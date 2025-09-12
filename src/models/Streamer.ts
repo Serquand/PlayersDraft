@@ -15,6 +15,6 @@ export class Streamer {
     @Column({ nullable: false })
     balance!: number;
 
-    @ManyToOne(() => Draft, draft => draft.streamers)
+    @ManyToOne(() => Draft, draft => draft.streamers, { onDelete: 'CASCADE' })
     draft!: Draft;
 }

@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Player } from "./Players";
 import { Streamer } from "./Streamer";
+import { DraftStatus } from "../utils/Enum";
 
 @Entity({ name: 'Drafts' })
 export class Draft {
@@ -22,8 +23,12 @@ export class Draft {
     @OneToMany(() => Streamer, streamer => streamer.draft)
     streamers!: Streamer[];
 
-    @Column({ default: false })
-    isActive!: boolean;
+    @Column({
+        type: 'enum',
+        enum: ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'],
+        default: 'NOT_STARTED'
+    })
+    status!: DraftStatus;
 
     @Column({ type: 'varchar', nullable: true })
     channelId!: string | null;

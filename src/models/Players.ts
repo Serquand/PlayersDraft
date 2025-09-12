@@ -9,7 +9,7 @@ export class Player {
     @Column()
     name!: string;
 
-    @ManyToOne(() => Draft, draft => draft.players)
+    @ManyToOne(() => Draft, draft => draft.players, { onDelete: 'CASCADE' })
     draft!: Draft;
 
     @Column({ default: 0 })

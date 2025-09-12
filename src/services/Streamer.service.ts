@@ -32,6 +32,10 @@ class StreamerService {
     async deleteStreamerById(id: number): Promise<void> {
         await this.streamerRepository.delete({ id });
     }
+
+    async updateStreamerBalance(id: number, newBalance: number): Promise<void> {
+        await this.streamerRepository.update({ id }, { balance: newBalance });
+    }
 }
 
 export default new StreamerService();
