@@ -22,7 +22,13 @@ class DraftService {
         return this.draftRepository.find();
     }
 
+    async getDraftByName(name: string): Promise<Draft | null> {
+        return this.draftRepository.findOne({ where: { name } });
+    }
 
+    async deleteDraftByName(name: string): Promise<void> {
+        await this.draftRepository.delete({ name });
+    }
 }
 
 export default new DraftService();
