@@ -1,6 +1,8 @@
 import { Repository } from "typeorm";
 import { Draft } from "../models/Draft";
 import { AppDataSource } from "../database";
+import { AutocompleteInteraction } from "discord.js";
+import { sendAutocomplete } from "../utils/autocomplete";
 
 class DraftService {
     private readonly draftRepository: Repository<Draft>;
@@ -22,12 +24,26 @@ class DraftService {
         return this.draftRepository.find();
     }
 
-    async getDraftByName(name: string): Promise<Draft | null> {
-        return this.draftRepository.findOne({ where: { name } });
+    async getDraftByName(name: string, relations: (keyof Draft)[] = []): Promise<Draft | null> {
+        return this.draftRepository.findOne({ where: { name }, relations });
+    }
+
+    getNumberOfPlayerForDraft(breakdown: string): number {
+        const byTownHalls = breakdown?.split('/')
+        let counter = 0;
+        for(const th of byTownHalls) {
+            counter += Number.parseInt(th)
+        }
+        return counter
     }
 
     async deleteDraftByName(name: string): Promise<void> {
         await this.draftRepository.delete({ name });
+    }
+
+    async autocompleteDraft(interaction: AutocompleteInteraction) {
+        const draftNames = (await this.listDraft()).map(d => d.name);
+        return sendAutocomplete(interaction, draftNames);
     }
 }
 

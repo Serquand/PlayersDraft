@@ -13,11 +13,20 @@ export class Player {
     draft!: Draft;
 
     @Column({ default: 0 })
-    price!: number;
+    basePrice!: number;
+
+    @Column({ default: 0 })
+    finalPrice!: number;
+
+    @Column({ default: false })
+    isSold!: boolean;
 
     @Column()
     incrementTime!: number;
 
     @Column()
     basisTime!: number;
+
+    @Column({ nullable: true, type: 'int' })
+    townHallLevel!: number | undefined;
 }

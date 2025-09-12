@@ -1,8 +1,13 @@
-import { Client, CommandInteraction } from "discord.js";
+// TODO: Vérifier que le nombre de joueurs correspond bien au nombre de streamers * nombre de joueurs par streamer
+
+import { AutocompleteFocusedOption, AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
 import { sendHiddenInteractionResponse, sendErrorInteractionResponse } from "../../utils/discord";
 import XLSX from "xlsx";
 import fetch from "node-fetch";
 import PlayerService from "../../services/Player.service";
+import { isRowPlayerValid } from "../../utils/validators";
+import { Player } from "../../models/Players";
+import DraftService from "../../services/Draft.service";
 
 const command = {
     name: 'import_players',
@@ -18,22 +23,26 @@ const command = {
             name: "draft",
             type: "STRING",
             required: true,
-            description: "Draft à laquelle ajouter les joueurs"
+            description: "Draft à laquelle ajouter les joueurs",
+            autocomplete: true
         }
     ],
     runSlash: async (client: Client, interaction: CommandInteraction) => {
         const attachment = interaction.options.getAttachment("file");
         const draftName = interaction.options.getString("draft");
+        const players: Array<Partial<Player>> = [];
 
         if (!draftName || !attachment) {
             return sendHiddenInteractionResponse(interaction, "Informations invalides");
         }
 
-        // Remove the current players association with the draft
-        await PlayerService.clearPlayersFromDraft(draftName);
-
         if (!attachment.name?.endsWith(".xlsx")) {
             return sendHiddenInteractionResponse(interaction, "Le fichier doit être au format .xlsx !");
+        }
+
+        const draft = await DraftService.getDraftByName(draftName, ["streamers"]);
+        if (!draft || draft.streamers.length === 0) {
+            return sendHiddenInteractionResponse(interaction, "La draft spécifiée n'existe pas ou n'a pas de streamer associé !");
         }
 
         try {
@@ -48,20 +57,31 @@ const command = {
 
             // Convertir la première feuille en JSON
             const data: any[] = XLSX.utils.sheet_to_json(sheet);
-            console.log(data);
 
             if (data.length === 0) {
                 return sendHiddenInteractionResponse(interaction, "Le fichier Excel est vide !");
             }
 
-            // Exemple : chaque ligne doit contenir Name et BasePrice
-            const players = data.map(row => ({
-                name: row.Name,
-                basePrice: Number(row.BasePrice || 0)
-            }));
+            for(const row of data) {
+                if (!isRowPlayerValid(row)) {
+                    return sendHiddenInteractionResponse(interaction, "Le format de donnée n'est pas valide !");
+                }
+
+                players.push({
+                    name: row.Name,
+                    basePrice: Number(row.BasePrice || 0),
+                    incrementTime: Number(row.IncrementTime || 3),
+                    basisTime: Number(row.BasisTime || 20),
+                    townHallLevel: row.TownHallLevel ? Number(row.TownHallLevel) : undefined,
+                    draft
+                })
+            }
+
+            // Supprimer les joueurs de la draft avant d'importer les nouveaux
+            await PlayerService.clearPlayersFromDraft(draft);
 
             // Sauvegarder les joueurs en base via PlayerService
-            // await PlayerService.bulkCreate(players);
+            await PlayerService.bulkCreate(players);
 
             return sendHiddenInteractionResponse(interaction, `✅ ${players.length} joueurs ont été importés avec succès !`);
         } catch (err) {
@@ -69,6 +89,7 @@ const command = {
             return sendErrorInteractionResponse(interaction);
         }
     },
+    autocomplete: (interaction: AutocompleteInteraction) => DraftService.autocompleteDraft(interaction)
 };
 
 export default command;
