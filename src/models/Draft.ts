@@ -7,7 +7,10 @@ export class Draft {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({ nullable: true, type: 'varchar' })
+    breakDown!: string | null;
+
+    @Column({ unique: true })
     name!: string;
 
     @OneToMany(() => Player, player => player.draft)

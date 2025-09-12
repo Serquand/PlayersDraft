@@ -1,6 +1,6 @@
 import { AnyChannel, Client, DMChannel, Message, NewsChannel, TextChannel } from "discord.js";
 
-export const sendHiddenInteractionResponse = (interaction: any, content: string) => {
+export const sendHiddenInteractionResponse = (interaction: any, content: string = 'Something went wrong') => {
     return interaction.reply({ content, ephemeral: true });
 }
 
