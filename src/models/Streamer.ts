@@ -9,6 +9,9 @@ export class Streamer {
     @Column()
     username!: string;
 
+    @Column()
+    discordId!: string;
+
     @Column({ nullable: false })
     balance!: number;
 
