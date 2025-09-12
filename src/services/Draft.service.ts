@@ -11,9 +11,9 @@ class DraftService {
         this.draftRepository = AppDataSource.getRepository(Draft);
     }
 
-    async registerDraft(name: string, breakDown: string | null): Promise<Draft> {
+    async registerDraft(draftToSave: Partial<Draft>): Promise<Draft> {
         try {
-            return await this.draftRepository.save({ breakDown, name });
+            return await this.draftRepository.save(draftToSave);
         } catch (error) {
             console.error("Error registering draft:", error);
             throw error;

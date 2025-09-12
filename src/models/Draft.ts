@@ -16,6 +16,9 @@ export class Draft {
     @OneToMany(() => Player, player => player.draft)
     players!: Player[];
 
+    @Column({ type: 'int' })
+    basisMoneyPerStreamer!: number;
+
     @OneToMany(() => Streamer, streamer => streamer.draft)
     streamers!: Streamer[];
 
