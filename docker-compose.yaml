@@ -1,0 +1,41 @@
+version: '3.8'
+
+networks:
+  backend:
+    driver: bridge
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    restart: always
+    env_file: .env
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ":3306"
+    volumes:
+      - db:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - ":6379"
+
+  app:
+    build: .
+    restart: always
+    depends_on:
+      - mysqldb
+      - redis
+    env_file: .env
+    environment:
+      DB_HOST: mysqldb
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    stdin_open: true
+    tty: true
+
+volumes:
+  db:
