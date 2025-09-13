@@ -70,7 +70,7 @@ const command = {
                 }
                 playersNames.add(row.Name);
 
-                players.push({
+                players.unshift({
                     name: row.Name,
                     basePrice: Number(row.BasePrice || 0),
                     incrementTime: Number(row.IncrementTime || 3),

@@ -58,8 +58,10 @@ const command = {
             }
         ]);
 
-        games[channel.id] = new Game(draft);
+        games[channel.id] = new Game(draft, channel);
         games[channel.id].launchDraft();
+
+        return sendHiddenInteractionResponse(interaction, `Draft **${draft.name}** lancée dans le channel ${channel}`);
     },
     autocomplete: async (interaction: AutocompleteInteraction) => DraftService.autocompleteDraft(interaction)
 }
