@@ -1,3 +1,7 @@
+// TODO: Faire l'assignement random
+// TODO: Handle _remainingPlayersByStreamerId
+// TODO: Supprimer l'argent d'un streamer à la fin de l'enchère
+
 import { Message, TextChannel } from "discord.js";
 import { Draft, Player, Streamer } from "../models";
 import { DraftStatus } from "../utils/Interfaces";
@@ -12,10 +16,10 @@ export class Game {
     private currentBid: number = 0;
     private currentBidder?: Streamer;
     private _channel: TextChannel;
+    private _remainingPlayersByStreamerId: Record<string, Record<string, number>>
 
-    // Ajouts
-    private currentAuctionStartTime?: number; // ms
-    private currentAuctionDuration?: number;  // secondes cumulées
+    private currentAuctionStartTime?: number;
+    private currentAuctionDuration?: number;
 
     constructor(draft: Draft, channel: TextChannel) {
         this._channel = channel
@@ -23,6 +27,7 @@ export class Game {
         this._draft = draft;
         this._players = draft.players;
         this._streamers = draft.streamers;
+        this._remainingPlayersByStreamerId = {}
     }
 
     log(message: string) {
@@ -82,6 +87,10 @@ export class Game {
         if (this.currentBidder) {
             player.finalPrice = this.currentBid;
             player.isSold = true;
+
+            // Décrémente l'argent
+            this.currentBidder.balance -= this.currentBid;
+
             this.log(`✅ ${player.name} est vendu à ${this.currentBidder.username} pour ${this.currentBid}`);
         } else {
             this.assignPlayerToRandomStreamer()
@@ -106,19 +115,20 @@ export class Game {
             return;
         }
 
+        // Vérifie que le joueur existe bien
         const player = this._players[this.currentPlayerIndex];
         if (!player) return;
 
-        if (bid > this.currentBid) {
+        // Vérifie que la mise est bien supérieure à l'ancienne mise et inférieure à la wallet du streamer
+        if (bid > this.currentBid && bid < streamer.balance) {
+            // Assigne les nouvelles informations pour le tarif et l'acquéreur
             this.currentBid = bid;
             this.currentBidder = streamer;
 
+            // Ajoute le temps d'incrément si besoin
             // Ajout du temps d'incrément
             if (this.currentAuctionDuration) {
                 this.currentAuctionDuration += player.incrementTime;
-                this.log(
-                    `⏱ Temps prolongé de +${player.incrementTime}s (nouvelle durée totale : ${this.currentAuctionDuration}s)`
-                );
             }
 
             this.log(`🔼 Nouvelle enchère : ${streamer.username} mise ${bid} sur ${player.name}`);
