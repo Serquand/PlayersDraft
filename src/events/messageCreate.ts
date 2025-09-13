@@ -1,10 +1,12 @@
 import { Client, Message } from "discord.js";
+import games from "../services/Game.service";
 
 export default {
     name: "messageCreate",
     once: false,
     async execute(client: Client, createdMessage: Message) {
-        // console.log(createdMessage.content);
-        // createdMessage.react('✅');
+        if(!games[createdMessage.channelId]) return;
+
+        games[createdMessage.channelId].handleMessage(createdMessage);
     }
 }

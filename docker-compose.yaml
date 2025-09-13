@@ -17,12 +17,6 @@ services:
     volumes:
       - db:/var/lib/mysql
 
-  redis:
-    image: redis:7
-    restart: always
-    ports:
-      - ":6379"
-
   app:
     build: .
     restart: always

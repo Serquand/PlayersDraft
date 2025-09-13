@@ -1,4 +1,3 @@
-// TODO: Check si des joueurs sont déjà dans la draft
 import { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
 import DraftService from "../../services/Draft.service";
 import StreamerService from "../../services/Streamer.service";
