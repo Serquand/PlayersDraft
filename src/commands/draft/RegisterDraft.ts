@@ -35,8 +35,12 @@ const command = {
             return sendHiddenInteractionResponse(interaction, "Vous devez fournir un nom pour la draft !");
         }
 
-        if (breakDown && !regexCheckBreadkDown.test(breakDown)) {
-            return sendHiddenInteractionResponse(interaction, "Le break down doit être au format X/X/X/X... (ex: 3/3/3/3/3) !");
+        if (
+            breakDown &&
+            (!regexCheckBreadkDown.test(breakDown) ||
+            DraftService.getTotalNumberInBreakdown(breakDown) % 5 !== 0)
+        ) {
+            return sendHiddenInteractionResponse(interaction, "Le break down doit être au format X/X/X/X... (ex: 3/3/3/3/3) et être un multiple de 5 !");
         }
 
         if (!basisMoneyPerStreamer || basisMoneyPerStreamer <= 0) {

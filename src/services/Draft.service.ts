@@ -29,6 +29,10 @@ class DraftService {
         return this.draftRepository.findOne({ where: { name }, relations });
     }
 
+    getTotalNumberInBreakdown(breakdown: string): number {
+        return breakdown.split('/').reduce((acc, val) => acc + Number.parseInt(val), 0);
+    }
+
     getNumberOfPlayerForDraft(draft: Draft): INumberOfPlayers | null {
         const breakdown = draft.breakDown;
         if (!draft.streamers?.length) return null;
