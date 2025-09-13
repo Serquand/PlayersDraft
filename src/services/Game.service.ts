@@ -1,12 +1,9 @@
 // TODO: Faire l'assignement random
 // TODO: Handle _remainingPlayersByStreamerId
-// TODO: Supprimer l'argent d'un streamer à la fin de l'enchère
-// TODO: Générer une méthode pour check l'aléatoire ici
 
-import { Message, MessageEmbed, MessagePayload, TextChannel } from "discord.js";
+import { Message, MessageEmbed, MessageOptions, TextChannel } from "discord.js";
 import { Draft, Player, Streamer } from "../models";
 import { DraftStatus } from "../utils/Interfaces";
-import { MessageOptions } from "child_process";
 import { sleep } from "../utils/common";
 
 export class Game {
@@ -33,7 +30,7 @@ export class Game {
         this._remainingPlayersByStreamerId = {}
     }
 
-    async log(message: any) {
+    async log(message: MessageOptions | string) {
         return await this._channel.send(message);
     }
 
@@ -109,12 +106,16 @@ export class Game {
         this.currentBidder.players.push(player)
         this.currentBidder.balance -= this.currentBid;
 
+        // Update the embed for informing the streamers about the sell
         const embed = this.generateEmbedForPlayer(Math.floor(Date.now() / 1_000), "Terminé");
         this.currentEmbedMessage!.edit({ embeds: [embed] })
 
-        await sleep(2) // Wait 2 seconds
-        await this.currentEmbedMessage!.delete()
+        // Log the action and then remove all trace
+        const logMessage = await this.log(`✅ Le joueur ${player.name} a été acheté par <@${this.currentBidder.discordId}> pour ${this.currentBid}`)
+        await sleep(3)
+        await Promise.all([logMessage.delete(), this.currentEmbedMessage!.delete()])
 
+        // Go to the next player
         this.currentPlayerIndex++;
         this.startNextAuction();
     }
