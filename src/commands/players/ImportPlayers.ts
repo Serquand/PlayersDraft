@@ -73,8 +73,8 @@ const command = {
                 players.unshift({
                     name: row.Name,
                     basePrice: Number(row.BasePrice || 0),
-                    incrementTime: Number(row.IncrementTime || 3),
-                    basisTime: Number(row.BasisTime || 20),
+                    incrementTime: Number(row.IncrementTime || draft.basisIncrementTime),
+                    basisTime: Number(row.BasisTime || draft.basisExpirationTime),
                     townHallLevel: row.TownHallLevel ? Number(row.TownHallLevel) : undefined,
                     draft
                 })

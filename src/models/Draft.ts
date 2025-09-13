@@ -20,6 +20,12 @@ export class Draft {
     @Column({ type: 'int' })
     basisMoneyPerStreamer!: number;
 
+    @Column({ type: 'int' })
+    basisExpirationTime!: number;
+
+    @Column({ type: 'int' })
+    basisIncrementTime!: number;
+
     @OneToMany(() => Streamer, streamer => streamer.draft)
     streamers!: Streamer[];
 
