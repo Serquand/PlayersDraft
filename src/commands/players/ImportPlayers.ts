@@ -29,6 +29,7 @@ const command = {
         const attachment = interaction.options.getAttachment("file");
         const draftName = interaction.options.getString("draft");
         const players: Array<Partial<Player>> = [];
+        const playersNames = new Set<string>();
 
         if (!draftName || !attachment) {
             return sendHiddenInteractionResponse(interaction, "Informations invalides");
@@ -63,6 +64,11 @@ const command = {
                 if (!isRowPlayerValid(row)) {
                     return sendHiddenInteractionResponse(interaction, "Le format de donnée n'est pas valide !");
                 }
+
+                if (playersNames.has(row.Name)) {
+                    return sendHiddenInteractionResponse(interaction, `Le joueur "${row.Name}" est en double dans le fichier !`);
+                }
+                playersNames.add(row.Name);
 
                 players.push({
                     name: row.Name,
