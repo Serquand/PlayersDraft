@@ -63,19 +63,19 @@ class DraftService {
         }
 
         const townHallCount: Record<number, number> = {};
-        let minimalTH = 1;
+        let maxTH = 1;
         for (const player of data) {
             const th = player.TownHallLevel;
             if (typeof th !== 'number' || !Number.isInteger(th) || th <= 0) {
                 return false;
             }
-            if (th > minimalTH) minimalTH = th;
+            if (th > maxTH) maxTH = th;
             townHallCount[th] = (townHallCount[th] || 0) + 1;
         }
 
         for (let i = 0; i < numberOfPlayers.byTownHalls.length; i++) {
             const expectedCount = numberOfPlayers.byTownHalls[i];
-            const actualCount = townHallCount[i + minimalTH] || 0;
+            const actualCount = townHallCount[maxTH - i] || 0;
             if (expectedCount !== actualCount) {
                 return false;
             }
