@@ -25,7 +25,7 @@ class DraftService {
         return this.draftRepository.find();
     }
 
-    async getDraftByName(name: string, relations: (keyof Draft)[] = []): Promise<Draft | null> {
+    async getDraftByName(name: string, relations: string[] = []): Promise<Draft | null> {
         return this.draftRepository.findOne({ where: { name }, relations });
     }
 

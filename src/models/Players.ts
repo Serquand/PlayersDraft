@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Draft } from "./Draft";
+import { Streamer } from "./Streamer";
 
 @Entity({ name: 'Players' })
 export class Player {
@@ -11,6 +12,9 @@ export class Player {
 
     @ManyToOne(() => Draft, draft => draft.players, { onDelete: 'CASCADE' })
     draft!: Draft;
+
+    @ManyToOne(() => Streamer, streamer => streamer.players, { nullable: true, onDelete: 'SET NULL' })
+    streamer!: Streamer | null;
 
     @Column({ default: 0 })
     basePrice!: number;

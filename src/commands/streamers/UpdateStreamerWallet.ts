@@ -1,5 +1,3 @@
-// TODO: Revoir la logique de la partie Streamer pour tout passer par ID
-
 import { Client, CommandInteraction, AutocompleteInteraction } from "discord.js";
 import DraftService from "../../services/Draft.service";
 import StreamerService from "../../services/Streamer.service";

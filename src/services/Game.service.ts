@@ -1,10 +1,13 @@
 // TODO: Faire l'assignement random
 // TODO: Handle _remainingPlayersByStreamerId
 // TODO: Supprimer l'argent d'un streamer à la fin de l'enchère
+// TODO: Générer une méthode pour check l'aléatoire ici
 
-import { Message, TextChannel } from "discord.js";
+import { Message, MessageEmbed, MessagePayload, TextChannel } from "discord.js";
 import { Draft, Player, Streamer } from "../models";
 import { DraftStatus } from "../utils/Interfaces";
+import { MessageOptions } from "child_process";
+import { sleep } from "../utils/common";
 
 export class Game {
     private _draft: Draft;
@@ -17,6 +20,7 @@ export class Game {
     private currentBidder?: Streamer;
     private _channel: TextChannel;
     private _remainingPlayersByStreamerId: Record<string, Record<string, number>>
+    private currentEmbedMessage?: Message;
 
     private currentAuctionStartTime?: number;
     private currentAuctionDuration?: number;
@@ -30,12 +34,11 @@ export class Game {
         this._remainingPlayersByStreamerId = {}
     }
 
-    log(message: string) {
-        this._channel.send(message);
+    async log(message: any) {
+        return await this._channel.send(message);
     }
 
     launchDraft() {
-        this.log(`Draft lancée avec ${this._players.length} joueurs.`);
         this.currentPlayerIndex = 0;
         this.startNextAuction();
     }
@@ -43,17 +46,18 @@ export class Game {
     private endDraft() {
         this.log("Draft terminée ✅");
 
-        delete games[this._channelId]; // Supprimer la draft de la mémoire
+        delete games[this._channelId]; // Supprimer la draft de la liste
         this._draft.status = DraftStatus.COMPLETED; // Mettre à jour le statut de la draft
         // TODO: Sauvegarder la draft et ses joueurs en DB via TypeORM
     }
 
-    private startNextAuction() {
+    private async startNextAuction() {
         if (this.currentPlayerIndex >= this._players.length) {
             this.endDraft();
             return;
         }
 
+        // Initialise les valeurs globales
         const player = this._players[this.currentPlayerIndex];
         this.currentBid = player.basePrice;
         this.currentBidder = undefined;
@@ -62,7 +66,9 @@ export class Game {
         this.currentAuctionStartTime = Date.now();
         this.currentAuctionDuration = player.basisTime;
 
-        this.log(`🟢 Enchère lancée pour ${player.name}, prix de base : ${player.basePrice}, durée : ${player.basisTime}s`);
+        // Generate and send embed
+        const embed = this.generateEmbedForPlayer();
+        this.currentEmbedMessage = await this.log({ embeds: [embed] });
 
         this.scheduleAuctionEnd();
     }
@@ -81,21 +87,28 @@ export class Game {
 
     }
 
-    private endAuction() {
+    private async endAuction() {
         const player = this._players[this.currentPlayerIndex];
 
-        if (this.currentBidder) {
-            player.finalPrice = this.currentBid;
-            player.isSold = true;
-
-            // Décrémente l'argent
-            this.currentBidder.balance -= this.currentBid;
-
-            this.log(`✅ ${player.name} est vendu à ${this.currentBidder.username} pour ${this.currentBid}`);
-        } else {
+        if (!this.currentBidder) {
+            player.finalPrice = 0;
+            this.currentBid = 0;
+            this.currentBidder = this._streamers[0] // TODO: Générer une méthode pour check l'aléatoire ici
             this.assignPlayerToRandomStreamer()
-            this.log(`❌ ${player.name} a été assigné à un streamer random`);
         }
+
+        player.finalPrice = this.currentBid;
+        player.streamer = this.currentBidder;
+        player.isSold = true;
+
+        this.currentBidder.players.push(player)
+        this.currentBidder.balance -= this.currentBid;
+
+        const embed = this.generateEmbedForPlayer(Math.floor(Date.now() / 1_000), "Terminé");
+        this.currentEmbedMessage!.edit({ embeds: [embed] })
+
+        await sleep(2) // Wait 2 seconds
+        await this.currentEmbedMessage!.delete()
 
         this.currentPlayerIndex++;
         this.startNextAuction();
@@ -136,9 +149,11 @@ export class Game {
             return;
         }
 
-        // Vérifie que le joueur existe bien
+        // Vérifie que le joueur existe bien et qu'il n'est pas encore sold
         const player = this._players[this.currentPlayerIndex];
-        if (!player) return;
+        if (!player || player.isSold) {
+            message.delete();
+        };
 
         // Vérifie que la mise est bien supérieure à l'ancienne mise et inférieure à la wallet du streamer
         if (bid > this.currentBid && bid < streamer.balance) {
@@ -152,13 +167,9 @@ export class Game {
                 this.currentAuctionDuration += player.incrementTime;
             }
 
-            this.log(`🔼 Nouvelle enchère : ${streamer.username} mise ${bid} sur ${player.name}`);
-
             this.scheduleAuctionEnd();
-            message.react("✅");
-        } else {
-            message.react("❌");
         }
+        message.delete();
     }
 }
 

@@ -24,7 +24,7 @@ const command = {
     runSlash: async (client: Client, interaction: CommandInteraction) => {
         const draftName = interaction.options.getString("draft", true);
         const channel = interaction.options.getChannel("channel_name", true);
-        const draft = await DraftService.getDraftByName(draftName, ['streamers', 'players']);
+        const draft = await DraftService.getDraftByName(draftName, ['streamers', 'players', 'streamers.players']);
 
         if(channel.type !== 'GUILD_TEXT') { // Check if the channel is a text channel
             return sendHiddenInteractionResponse(interaction, "Le channel doit être un channel texte.");
