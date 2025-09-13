@@ -101,6 +101,27 @@ export class Game {
         this.startNextAuction();
     }
 
+    generateEmbedForPlayer(
+        endTime?: number,
+        status: 'Terminé' | 'En cours' = 'En cours'
+    ): MessageEmbed {
+        const basisEndTime = Math.floor((this.currentAuctionStartTime ?? 0 + (this.currentAuctionDuration ?? 0) * 1_000) / 1_000);
+        const realEndTime = endTime ?? basisEndTime;
+        const player = this._players[this.currentPlayerIndex];
+
+        return new MessageEmbed()
+            .setColor('DARK_RED')
+            .setThumbnail("https://www.coupedesregions.com/logo-cdr.png")
+            .setTitle(`Enchère pour le joueur : ${player.name} ${player.townHallLevel ? `(TH ${player.townHallLevel})` : ''}`)
+            .setFields(
+                { name: "Status", value: status, inline: true },
+                { name: "Fin de l'enchère", value: `<t:${realEndTime}:R>`, inline: true },
+                { name: "\u200B", value: "\u200B", inline: true },
+                { name: "Montant actuel", value: `${this.currentBid}`, inline: true },
+                { name: "Enchéreur", value: this.currentBidder ? this.currentBidder.username : 'Aucun', inline: true },
+            )
+    }
+
     handleMessage(message: Message) {
         const content = message.content.trim();
 
