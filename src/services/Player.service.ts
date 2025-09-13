@@ -11,9 +11,7 @@ class PlayerService {
     }
 
     async clearPlayersFromDraft(draft: Draft): Promise<void> {
-        console.log("Ma bite dans Capu");
         await this.playerRepository.delete({ draft });
-        console.log("Ma bite dans Emilie");
     }
 
     async bulkCreate(players: Array<Partial<Player>>): Promise<void> {
