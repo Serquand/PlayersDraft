@@ -2,6 +2,7 @@
 // TODO: Handle _remainingPlayersByStreamerId
 // TODO: Supprimer l'argent d'un streamer à la fin de l'enchère
 // TODO: Générer une méthode pour check l'aléatoire ici
+// TODO: Ajoute le temps d'incrément si besoin
 
 import { Message, MessageEmbed, MessagePayload, TextChannel } from "discord.js";
 import { Draft, Player, Streamer } from "../models";
@@ -21,7 +22,6 @@ export class Game {
     private _channel: TextChannel;
     private _remainingPlayersByStreamerId: Record<string, Record<string, number>>
     private currentEmbedMessage?: Message;
-
     private currentAuctionStartTime?: number;
     private currentAuctionDuration?: number;
 
@@ -118,8 +118,9 @@ export class Game {
         endTime?: number,
         status: 'Terminé' | 'En cours' = 'En cours'
     ): MessageEmbed {
-        const basisEndTime = Math.floor((this.currentAuctionStartTime ?? 0 + (this.currentAuctionDuration ?? 0) * 1_000) / 1_000);
+        const basisEndTime = Math.floor(((this.currentAuctionStartTime ?? 0) + (this.currentAuctionDuration ?? 0) * 1000) / 1_000);
         const realEndTime = endTime ?? basisEndTime;
+
         const player = this._players[this.currentPlayerIndex];
 
         return new MessageEmbed()
@@ -131,7 +132,7 @@ export class Game {
                 { name: "Fin de l'enchère", value: `<t:${realEndTime}:R>`, inline: true },
                 { name: "\u200B", value: "\u200B", inline: true },
                 { name: "Montant actuel", value: `${this.currentBid}`, inline: true },
-                { name: "Enchéreur", value: this.currentBidder ? this.currentBidder.username : 'Aucun', inline: true },
+                { name: "Enchéreur", value: this.currentBidder ? `<@${this.currentBidder.discordId}>` : 'Aucun', inline: true },
             )
     }
 
@@ -161,13 +162,11 @@ export class Game {
             this.currentBid = bid;
             this.currentBidder = streamer;
 
-            // Ajoute le temps d'incrément si besoin
+            // TODO: Ajoute le temps d'incrément si besoin
             // Ajout du temps d'incrément
-            if (this.currentAuctionDuration) {
-                this.currentAuctionDuration += player.incrementTime;
-            }
 
-            this.scheduleAuctionEnd();
+            const embed = this.generateEmbedForPlayer()
+            this.currentEmbedMessage!.edit({ embeds: [embed] })
         }
         message.delete();
     }

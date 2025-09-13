@@ -1,3 +1,5 @@
+// TODO: Fix les permissions
+
 import { AutocompleteInteraction, Client, CommandInteraction, PermissionResolvable } from "discord.js";
 import DraftService from "../../services/Draft.service";
 import { sendHiddenInteractionResponse } from "../../utils/discord";
