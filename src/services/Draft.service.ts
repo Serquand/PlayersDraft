@@ -53,6 +53,10 @@ class DraftService {
         const numberOfPlayers = this.getNumberOfPlayerForDraft(draft);
         if (!numberOfPlayers) return false;
 
+        if (!draft.breakDown) {
+            return data.length % draft.streamers.length === 0;
+        }
+
         const actualNumberOfPlayers = data.length;
         if(actualNumberOfPlayers !== numberOfPlayers.total) {
             return false;
