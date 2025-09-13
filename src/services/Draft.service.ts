@@ -3,6 +3,7 @@ import { Draft } from "../models/Draft";
 import { AppDataSource } from "../database";
 import { AutocompleteInteraction } from "discord.js";
 import { sendAutocomplete } from "../utils/autocomplete";
+import { INumberOfPlayers } from "../utils/Interfaces";
 
 class DraftService {
     private readonly draftRepository: Repository<Draft>;
@@ -28,13 +29,55 @@ class DraftService {
         return this.draftRepository.findOne({ where: { name }, relations });
     }
 
-    getNumberOfPlayerForDraft(breakdown: string): number {
-        const byTownHalls = breakdown?.split('/')
+    getNumberOfPlayerForDraft(draft: Draft): INumberOfPlayers | null {
+        const breakdown = draft.breakDown;
+        if (!draft.streamers?.length) return null;
+        if (!breakdown) return { total: 0, byTownHalls: [] };
+
+        const byTownHalls = breakdown.split('/');
+        const userByTownHalls = []
+
         let counter = 0;
         for(const th of byTownHalls) {
             counter += Number.parseInt(th)
+            userByTownHalls.push(Number.parseInt(th) * draft.streamers.length);
         }
-        return counter
+
+        return {
+            total: counter * draft.streamers.length,
+            byTownHalls: userByTownHalls
+        }
+    }
+
+    checkIfNumberOfPlayersIsValid(draft: Draft, data: Array<any>): boolean {
+        const numberOfPlayers = this.getNumberOfPlayerForDraft(draft);
+        if (!numberOfPlayers) return false;
+
+        const actualNumberOfPlayers = data.length;
+        if(actualNumberOfPlayers !== numberOfPlayers.total) {
+            return false;
+        }
+
+        const townHallCount: Record<number, number> = {};
+        let minimalTH = 1;
+        for (const player of data) {
+            const th = player.TownHallLevel;
+            if (typeof th !== 'number' || !Number.isInteger(th) || th <= 0) {
+                return false;
+            }
+            if (th > minimalTH) minimalTH = th;
+            townHallCount[th] = (townHallCount[th] || 0) + 1;
+        }
+
+        for (let i = 0; i < numberOfPlayers.byTownHalls.length; i++) {
+            const expectedCount = numberOfPlayers.byTownHalls[i];
+            const actualCount = townHallCount[i + minimalTH] || 0;
+            if (expectedCount !== actualCount) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     async deleteDraftByName(name: string): Promise<void> {

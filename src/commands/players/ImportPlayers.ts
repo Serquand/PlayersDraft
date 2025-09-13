@@ -1,6 +1,4 @@
-// TODO: Vérifier que le nombre de joueurs correspond bien au nombre de streamers * nombre de joueurs par streamer
-
-import { AutocompleteFocusedOption, AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
+import { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
 import { sendHiddenInteractionResponse, sendErrorInteractionResponse } from "../../utils/discord";
 import XLSX from "xlsx";
 import fetch from "node-fetch";
@@ -57,9 +55,8 @@ const command = {
 
             // Convertir la première feuille en JSON
             const data: any[] = XLSX.utils.sheet_to_json(sheet);
-
-            if (data.length === 0) {
-                return sendHiddenInteractionResponse(interaction, "Le fichier Excel est vide !");
+            if (!DraftService.checkIfNumberOfPlayersIsValid(draft, data)) {
+                return sendHiddenInteractionResponse(interaction, "Le fichier Excel ne contient pas un nombre valide de joueurs !");
             }
 
             for(const row of data) {

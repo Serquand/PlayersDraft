@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Player } from "./Players";
 import { Streamer } from "./Streamer";
-import { DraftStatus } from "../utils/Enum";
+import { DraftStatus } from "../utils/Interfaces";
 
 @Entity({ name: 'Drafts' })
 export class Draft {

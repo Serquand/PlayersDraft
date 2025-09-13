@@ -4,7 +4,7 @@ import { Client, CommandInteraction, AutocompleteInteraction } from "discord.js"
 import DraftService from "../../services/Draft.service";
 import StreamerService from "../../services/Streamer.service";
 import { sendHiddenInteractionResponse } from "../../utils/discord";
-import { DraftStatus } from "../../utils/Enum";
+import { DraftStatus } from "../../utils/Interfaces";
 
 const command = {
     name: "update_streamer_wallet",
