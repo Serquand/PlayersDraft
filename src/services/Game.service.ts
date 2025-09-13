@@ -2,7 +2,6 @@
 // TODO: Handle _remainingPlayersByStreamerId
 // TODO: Supprimer l'argent d'un streamer à la fin de l'enchère
 // TODO: Générer une méthode pour check l'aléatoire ici
-// TODO: Ajoute le temps d'incrément si besoin
 
 import { Message, MessageEmbed, MessagePayload, TextChannel } from "discord.js";
 import { Draft, Player, Streamer } from "../models";
@@ -73,14 +72,20 @@ export class Game {
         this.scheduleAuctionEnd();
     }
 
-    private scheduleAuctionEnd() {
+    private computeEndTime(): number {
+        return this.currentAuctionStartTime! + this.currentAuctionDuration! * 1000;
+    }
+
+    private computeRemainingTime(): number {
+        return this.computeEndTime() - Date.now();
+    }
+
+    private scheduleAuctionEnd(remainingTime?: number) {
         if (!this.currentAuctionStartTime || !this.currentAuctionDuration) return;
 
-        const endTime = this.currentAuctionStartTime + this.currentAuctionDuration * 1000;
-        const remaining = endTime - Date.now();
-
+        const localRemainingTime = remainingTime ?? this.computeRemainingTime()
         if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(() => this.endAuction(), remaining);
+        this.timer = setTimeout(() => this.endAuction(), localRemainingTime);
     }
 
     private assignPlayerToRandomStreamer() {
@@ -162,10 +167,17 @@ export class Game {
             this.currentBid = bid;
             this.currentBidder = streamer;
 
-            // TODO: Ajoute le temps d'incrément si besoin
-            // Ajout du temps d'incrément
+            const remainingTime = this.computeRemainingTime()
+            let embed: MessageEmbed | undefined;
 
-            const embed = this.generateEmbedForPlayer()
+            // Ajout de l'incrément si le temps restant est inférieur à l'incrément
+            if (remainingTime < player.incrementTime * 1_000) {
+                this.scheduleAuctionEnd(player.incrementTime * 1_000)
+                embed = this.generateEmbedForPlayer(Math.ceil(Date.now() / 1_000) + player.incrementTime)
+            } else {
+                embed = this.generateEmbedForPlayer()
+            }
+
             this.currentEmbedMessage!.edit({ embeds: [embed] })
         }
         message.delete();
