@@ -172,7 +172,7 @@ export class Game {
 
         const player = this._players[this.currentPlayerIndex];
 
-        return basisEmbed
+        return basisEmbed()
             .setTitle(`Enchère pour le joueur : ${player.name} ${player.townHallLevel ? `(TH ${player.townHallLevel})` : ''}`)
             .setFields(
                 { name: "Status", value: status, inline: true },
