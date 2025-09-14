@@ -1,10 +1,7 @@
-// TODO: Faire l'assignement random
-// TODO: Handle _remainingPlayersByStreamerId
-
 import { Message, MessageEmbed, MessageOptions, TextChannel } from "discord.js";
 import { Draft, Player, Streamer } from "../models";
 import { DraftStatus } from "../utils/Interfaces";
-import { sleep } from "../utils/common";
+import { generateRandomNumber, sleep } from "../utils/common";
 import DraftService from "./Draft.service";
 
 export class Game {
@@ -112,8 +109,21 @@ export class Game {
         this.timer = setTimeout(() => this.endAuction(), localRemainingTime);
     }
 
-    private assignPlayerToRandomStreamer() {
-        // TODO:
+    private assignPlayerToRandomStreamer(): Streamer {
+        const player = this._players[this.currentPlayerIndex];
+        const thLevel = player.townHallLevel
+        const eligibleStreamers: Streamer[] = [];
+
+        for(const streamerDiscordId in this._remainingPlayersByStreamerId) {
+            const streamerLeft = this._remainingPlayersByStreamerId[streamerDiscordId][thLevel]
+            const streamer = this._streamers.find(s => s.discordId === streamerDiscordId)
+            if (streamerLeft > 0 && streamer) {
+                eligibleStreamers.push(streamer)
+            }
+        }
+
+        const randomIndex = generateRandomNumber(0, eligibleStreamers.length - 1)
+        return eligibleStreamers[randomIndex]
     }
 
     private async endAuction() {
@@ -122,8 +132,7 @@ export class Game {
         if (!this.currentBidder) {
             player.finalPrice = 0;
             this.currentBid = 0;
-            this.currentBidder = this._streamers[0] // TODO: Générer une méthode pour check l'aléatoire ici
-            this.assignPlayerToRandomStreamer()
+            this.currentBidder = this.assignPlayerToRandomStreamer()
         }
 
         player.finalPrice = this.currentBid;
