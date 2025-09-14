@@ -1,7 +1,10 @@
-import { AnyChannel, Client, CommandInteraction, DMChannel, Message, NewsChannel, TextChannel } from "discord.js";
+import { AnyChannel, Client, CommandInteraction, DMChannel, InteractionReplyOptions, Message, NewsChannel, TextChannel } from "discord.js";
 
-export const sendHiddenInteractionResponse = (interaction: CommandInteraction, content: string = 'Something went wrong') => {
-    return interaction.reply({ content, ephemeral: true });
+export const sendHiddenInteractionResponse = (interaction: CommandInteraction, content: string | InteractionReplyOptions = 'Something went wrong') => {
+    if (typeof content === 'string') {
+        return interaction.reply({ content, ephemeral: true });
+    }
+    return interaction.reply({ ...content, ephemeral: true });
 }
 
 export const fetchChannel = async (client: Client, channelId: string): Promise<AnyChannel | null> => {

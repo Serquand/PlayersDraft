@@ -1,5 +1,7 @@
 import { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
 import DraftService from "../../services/Draft.service";
+import DraftEmbedGenerator from "../../services/DraftEmbedGenerator.service";
+import { sendHiddenInteractionResponse } from "../../utils/discord";
 
 const command = {
     name: 'view_draft_information',
@@ -16,8 +18,8 @@ const command = {
     async runSlash(client: Client, interaction: CommandInteraction) {
         const draftName = interaction.options.getString('draft_name', true);
         const draft = await DraftService.getDraftByName(draftName, ['streamers', 'players', 'streamers.players'])
-        console.log(draft)
-        // TODO:
+        const embeds = new DraftEmbedGenerator(draft!).generateEmbeds()
+        return sendHiddenInteractionResponse(interaction, { embeds })
     },
     autocomplete: (interaction: AutocompleteInteraction) => DraftService.autocompleteDraft(interaction)
 }
