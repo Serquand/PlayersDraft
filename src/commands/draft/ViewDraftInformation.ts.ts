@@ -1,4 +1,3 @@
-// TODO: Supprimer le Discord Username de partout => ne passer que par le DiscordID / Si besoin d'affichage : <@DISCORD_ID>
 import { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
 import DraftService from "../../services/Draft.service";
 
