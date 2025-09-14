@@ -5,6 +5,7 @@ import { Message, MessageEmbed, MessageOptions, TextChannel } from "discord.js";
 import { Draft, Player, Streamer } from "../models";
 import { DraftStatus } from "../utils/Interfaces";
 import { sleep } from "../utils/common";
+import DraftService from "./Draft.service";
 
 export class Game {
     private _draft: Draft;
@@ -16,10 +17,11 @@ export class Game {
     private currentBid: number = 0;
     private currentBidder?: Streamer;
     private _channel: TextChannel;
-    private _remainingPlayersByStreamerId: Record<string, Record<string, number>>
+    private _remainingPlayersByStreamerId!: Record<string, Record<string, number>>
     private currentEmbedMessage?: Message;
     private currentAuctionStartTime?: number;
     private currentAuctionDuration?: number;
+    private _canBeLaunched!: boolean;
 
     constructor(draft: Draft, channel: TextChannel) {
         this._channel = channel
@@ -27,20 +29,40 @@ export class Game {
         this._draft = draft;
         this._players = draft.players;
         this._streamers = draft.streamers;
-        this._remainingPlayersByStreamerId = {}
+        this.computeRemainingPlayersByStreamerId()
     }
 
     async log(message: MessageOptions | string) {
         return await this._channel.send(message);
     }
 
-    static computeRemainingPlayersByStreamerId(draft: Draft) {
-        console.log(draft);
+    computeRemainingPlayersByStreamerId() {
+        const histogram = DraftService.buildTownHallHistogram(this._draft.players, 'townHallLevel')
+        if (!histogram) {
+            return this._canBeLaunched = false;
+        }
+
+        // Construct what each streamer needs
+        const playerByTh: Record<number, number> = {}
+        Object.keys(histogram.counts).forEach(th => {
+            const numberTh = Number(th)
+            playerByTh[numberTh] = histogram.counts[numberTh] / this._draft.streamers.length
+        })
+
+        // Assign for each streamers
+        const remainingPlayersByStreamerId: Record<string, Record<string, number>> = {}
+        for (const streamer of this._draft.streamers) {
+            remainingPlayersByStreamerId[streamer.discordId] = playerByTh
+        }
+        this._remainingPlayersByStreamerId = remainingPlayersByStreamerId;
     }
 
-    launchDraft() {
+    launchDraft(): boolean {
+        if(!this._canBeLaunched) return false
+
         this.currentPlayerIndex = 0;
         this.startNextAuction();
+        return true
     }
 
     private endDraft() {

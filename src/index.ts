@@ -9,22 +9,20 @@ import DraftService from "./services/Draft.service";
 import { Game } from "./services/Game.service";
 
 async function main() {
-    // const client = new Client({ intents: 3276799 });
+    const client = new Client({ intents: 3276799 });
 
     // @ts-ignore
-    // client.commands = new Collection();
-    // client.login(process.env.BOT_TOKEN);
+    client.commands = new Collection();
+    client.login(process.env.BOT_TOKEN);
 
-    // await Promise.all([ eventHandler(client), commandHandler(client) ]);
+    await Promise.all([ eventHandler(client), commandHandler(client) ]);
 
+    // TODO: Voir si on peut améliorer le bordel de la db
     // setInterval(async () => {
     //     await initializeDatabase();
     // }, 1_000);
 
-    // TODO: Voir si on peut améliorer le bordel de la db
     await initializeDatabase();
-    const draft = await DraftService.getDraftByName('Coucou', ['streamers'])
-    Game.computeRemainingPlayersByStreamerId(draft!)
 }
 
 main();

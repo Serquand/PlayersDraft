@@ -53,12 +53,12 @@ class DraftService {
         }
     }
 
-    buildTownHallHistogram(data: Array<{ TownHallLevel: number }>): { counts: Record<number, number>; maxTH: number } | null {
+    buildTownHallHistogram<T>(data: Array<T>, townHallKey: keyof T): { counts: Record<number, number>; maxTH: number } | null {
         const counts: Record<number, number> = {};
         let maxTH = 0;
 
         for (const p of data) {
-            const th = p?.TownHallLevel;
+            const th = p[townHallKey];
             if (typeof th !== "number" || !Number.isInteger(th) || th <= 0) {
                 return null;
             }
@@ -86,21 +86,9 @@ class DraftService {
 
     checkIfNumberOfPlayersIsValid(draft: Draft, data: Array<any>): boolean {
         const numberOfPlayers = this.getNumberOfPlayerForDraft(draft);
-        if (!numberOfPlayers) return false;
+        if (!numberOfPlayers || data.length !== numberOfPlayers.total) return false;
 
-        const actualTotal = data.length;
-
-        // Pas de breakdown => juste vérifier une répartition possible entre streamers
-        if (!draft.breakDown) {
-            return actualTotal > 0 && actualTotal % draft.streamers.length === 0;
-        }
-
-        // Avec breakdown => total exact + matching de l'histogramme
-        if (actualTotal !== numberOfPlayers.total) {
-            return false;
-        }
-
-        const histogram = this.buildTownHallHistogram(data as Array<{ TownHallLevel: number }>);
+        const histogram = this.buildTownHallHistogram(data, "TownHallLevel");
         if (!histogram) return false;
 
         return this.validateTownHallBreakdown(numberOfPlayers.byTownHalls, histogram);
