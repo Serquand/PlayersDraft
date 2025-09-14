@@ -22,12 +22,12 @@ services:
     restart: always
     depends_on:
       - mysqldb
-      - redis
     env_file: .env
     environment:
       DB_HOST: mysqldb
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      NODE_ENV: prod
     stdin_open: true
     tty: true
 

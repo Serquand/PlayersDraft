@@ -16,3 +16,11 @@ export const basisEmbed = (): MessageEmbed => {
 
     return embed;
 };
+
+export const isProductionMode = (): boolean => {
+    if(!process.env.NODE_ENV) return false
+    const nodeEnvLower = process.env.NODE_ENV.toLowerCase()
+    return ['prod', 'production'].includes(nodeEnvLower)
+}
+
+export const BASIS_LOCATION_OF_FILES = isProductionMode() ? 'dist/' : 'src/'

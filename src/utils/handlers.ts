@@ -1,11 +1,10 @@
 import { Client } from "discord.js";
 import { loadFiles } from "./common";
-
-const basisLocation = process.env.NODE_ENV === "prod" ? 'dist/' : 'src/'
+import { BASIS_LOCATION_OF_FILES } from "./constants";
 
 export const commandHandler = async (client: Client) => {
     try {
-        const commandFiles = await loadFiles(basisLocation + "commands");
+        const commandFiles = await loadFiles(BASIS_LOCATION_OF_FILES + "commands");
         for(let i = 0; i < commandFiles.length; i++) {
             const cmdFile = commandFiles[i];
             try {
@@ -32,7 +31,7 @@ export const commandHandler = async (client: Client) => {
 
 export const eventHandler = async (client: Client) => {
     try {
-        const eventFiles = await loadFiles(basisLocation + "events");
+        const eventFiles = await loadFiles(BASIS_LOCATION_OF_FILES + "events");
 
         for (const eventFile of eventFiles) {
             try {
