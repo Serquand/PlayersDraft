@@ -1,5 +1,3 @@
-// TODO: Fix les permissions
-
 import { AutocompleteInteraction, Client, CommandInteraction, PermissionResolvable } from "discord.js";
 import DraftService from "../../services/Draft.service";
 import { sendHiddenInteractionResponse } from "../../utils/discord";
@@ -53,7 +51,7 @@ const command = {
             },
             ...draft.streamers.map(s => ({
                 id: s.discordId,
-                allow: ['VIEW_CHANNEL', 'ADD_REACTIONS'] as PermissionResolvable[],
+                allow: ['VIEW_CHANNEL', 'ADD_REACTIONS', 'SEND_MESSAGES'] as PermissionResolvable[],
             })),
             {
                 id: client.user!.id, // The bot
