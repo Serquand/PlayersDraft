@@ -47,7 +47,7 @@ const command = {
 
         if (!isValidTime(basisExpirationTime)) {
             return sendHiddenInteractionResponse(interaction, "Le temps d'expiration n'est pas valide !")
-        } else if (basisIncrementTime) {
+        } else if (!isValidTime(basisIncrementTime)) {
             return sendHiddenInteractionResponse(interaction, "Le temps d'incrément n'est pas valide !")
         }
 
