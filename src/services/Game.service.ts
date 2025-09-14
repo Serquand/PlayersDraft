@@ -29,6 +29,7 @@ export class Game {
         this._draft = draft;
         this._players = draft.players;
         this._streamers = draft.streamers;
+        this._canBeLaunched = true;
         this.computeRemainingPlayersByStreamerId()
     }
 
@@ -52,7 +53,7 @@ export class Game {
         // Assign for each streamers
         const remainingPlayersByStreamerId: Record<string, Record<string, number>> = {}
         for (const streamer of this._draft.streamers) {
-            remainingPlayersByStreamerId[streamer.discordId] = playerByTh
+            remainingPlayersByStreamerId[streamer.discordId] = {...playerByTh}
         }
         this._remainingPlayersByStreamerId = remainingPlayersByStreamerId;
     }
@@ -112,7 +113,7 @@ export class Game {
     }
 
     private assignPlayerToRandomStreamer() {
-
+        // TODO:
     }
 
     private async endAuction() {
@@ -131,6 +132,7 @@ export class Game {
 
         this.currentBidder.players.push(player)
         this.currentBidder.balance -= this.currentBid;
+        this._remainingPlayersByStreamerId[this.currentBidder.discordId][player.townHallLevel] -= 1;
 
         // Update the embed for informing the streamers about the sell
         const embed = this.generateEmbedForPlayer(Math.floor(Date.now() / 1_000), "Terminé");
@@ -173,6 +175,7 @@ export class Game {
         // Vérifie si c'est une enchère valide (nombre)
         // Vérifie que le joueur existe bien et qu'il n'est pas encore sold
         // Vérifie que la mise est bien supérieure à l'ancienne mise et inférieure à la wallet du streamer
+        // Vérifier que le streamer peut encore acheter un joueur de son niveau de TH
 
         return (
             !streamer ||
@@ -180,7 +183,8 @@ export class Game {
             !player ||
             player.isSold ||
             bid! <= this.currentBid ||
-            bid! >= streamer.balance
+            bid! >= streamer.balance ||
+            !(this._remainingPlayersByStreamerId[streamer.discordId][player.townHallLevel] > 0)
         );
     }
 

@@ -31,6 +31,6 @@ export class Player {
     @Column()
     basisTime!: number;
 
-    @Column({ nullable: true, type: 'int' })
-    townHallLevel!: number | undefined;
+    @Column()
+    townHallLevel!: number;
 }
