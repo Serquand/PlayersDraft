@@ -62,7 +62,7 @@ const command = {
         ]);
 
         games[channel.id] = new Game(draft, channel);
-        if (!games[channel.id].launchDraft()) {
+        if (!await games[channel.id].launchDraft()) {
             return sendHiddenInteractionResponse(interaction, `The draft has a problem in its data and can't be launched ! En théorie c'est censé jamais arriver mais bon... Si vous avez ce message, contactez-moi les reufs ❤️`)
         }
 

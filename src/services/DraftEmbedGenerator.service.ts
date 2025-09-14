@@ -26,7 +26,7 @@ export default class DraftEmbedGenerator {
     }
 
     private generateTeamsEmbed(): MessageEmbed {
-        const generatePlayerString = (p: Player) => `${p.name} (TH${p.townHallLevel}), pour ${p.finalPrice}💰`;
+        const generatePlayerString = (p: Player) => `${p.name} (TH${p.townHallLevel})`;
         const embed = basisEmbed().setTitle("👥 Composition des équipes");
 
         for (const streamer of this._draft.streamers) {
@@ -36,7 +36,7 @@ export default class DraftEmbedGenerator {
             embed.addFields({
                 name: streamer.username || 'NC',
                 value: `Streamer : <@${streamer.discordId}>\n${value}`,
-                inline: true
+                inline: false
             });
         }
 
@@ -44,7 +44,7 @@ export default class DraftEmbedGenerator {
     }
 
     private generateNextPlayersEmbed(): MessageEmbed {
-        const generateNextPlayerDescriptionSegment = (p: Player) => `${p.name} (TH${p.townHallLevel}), base ${p.basePrice}`;
+        const generateNextPlayerDescriptionSegment = (p: Player) => `${p.name} (TH${p.townHallLevel})`;
 
         const remainingPlayers = this._draft.players.filter((p) => !p.isSold);
         const nextPlayerList = remainingPlayers.map(generateNextPlayerDescriptionSegment).join("\n")

@@ -5,6 +5,7 @@ import { generateRandomNumber, sleep } from "../utils/common";
 import DraftService from "./Draft.service";
 import { AppDataSource } from "../database";
 import { basisEmbed } from "../utils/constants";
+import DraftEmbedGenerator from "./DraftEmbedGenerator.service";
 
 export class Game {
     private _draft: Draft;
@@ -21,6 +22,8 @@ export class Game {
     private currentAuctionStartTime?: number;
     private currentAuctionDuration?: number;
     private _canBeLaunched!: boolean;
+    private _draftEmbedMessage?: Message;
+    private _draftEmbedGenerator: DraftEmbedGenerator
 
     constructor(draft: Draft, channel: TextChannel) {
         this._channel = channel
@@ -29,7 +32,8 @@ export class Game {
         this._players = draft.players;
         this._streamers = draft.streamers;
         this._canBeLaunched = true;
-        this.computeRemainingPlayersByStreamerId()
+        this._draftEmbedGenerator = new DraftEmbedGenerator(this._draft);
+        this.computeRemainingPlayersByStreamerId();
     }
 
     async log(message: MessageOptions | string) {
@@ -57,9 +61,11 @@ export class Game {
         this._remainingPlayersByStreamerId = remainingPlayersByStreamerId;
     }
 
-    launchDraft(): boolean {
+    async launchDraft(): Promise<boolean> {
         if(!this._canBeLaunched) return false
 
+        this._draft.status = DraftStatus.IN_PROGRESS
+        this._draftEmbedMessage = await this.log({ embeds: this._draftEmbedGenerator.generateEmbeds() })
         this.currentPlayerIndex = 0;
         this.startNextAuction();
         return true
@@ -74,6 +80,7 @@ export class Game {
             AppDataSource.getRepository(Player).save(this._players),
         ])
 
+        this._draftEmbedMessage = await this.log({ embeds: this._draftEmbedGenerator.generateEmbeds() })
         delete games[this._channelId]; // Supprimer la draft de la liste
     }
 
@@ -155,6 +162,7 @@ export class Game {
 
         // Log the action and then remove all trace
         const logMessage = await this.log(`✅ Le joueur ${player.name} a été acheté par <@${this.currentBidder.discordId}> pour ${this.currentBid}`)
+        this._draftEmbedMessage?.edit({ embeds: this._draftEmbedGenerator.generateEmbeds() })
         await sleep(3)
         await Promise.all([logMessage.delete(), this.currentEmbedMessage!.delete()])
 
