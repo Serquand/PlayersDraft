@@ -34,6 +34,10 @@ export class Game {
         return await this._channel.send(message);
     }
 
+    static computeRemainingPlayersByStreamerId(draft: Draft) {
+        console.log(draft);
+    }
+
     launchDraft() {
         this.currentPlayerIndex = 0;
         this.startNextAuction();
@@ -142,45 +146,53 @@ export class Game {
             )
     }
 
+    private isInvalidBid(streamer?: Streamer, bid?: number, player?: Player): boolean {
+        // Vérifie que l’auteur est un streamer autorisé
+        // Vérifie si c'est une enchère valide (nombre)
+        // Vérifie que le joueur existe bien et qu'il n'est pas encore sold
+        // Vérifie que la mise est bien supérieure à l'ancienne mise et inférieure à la wallet du streamer
+
+        return (
+            !streamer ||
+            isNaN(bid!) ||
+            !player ||
+            player.isSold ||
+            bid! <= this.currentBid ||
+            bid! >= streamer.balance
+        );
+    }
+
     handleMessage(message: Message) {
         const content = message.content.trim();
-
-        // Vérifie que l’auteur est un streamer autorisé
-        const streamer = this._streamers.find(s => s.discordId === message.author.id);
-        if (!streamer) return;
-
-        // Vérifie si c'est une enchère valide (nombre)
-        const bid = parseInt(content, 10);
-        if (isNaN(bid)) {
-            message.delete();
-            return;
-        }
-
-        // Vérifie que le joueur existe bien et qu'il n'est pas encore sold
         const player = this._players[this.currentPlayerIndex];
-        if (!player || player.isSold) {
-            message.delete();
-        };
+        const streamer = this._streamers.find(s => s.discordId === message.author.id);
+        const bid = parseInt(content, 10);
 
-        // Vérifie que la mise est bien supérieure à l'ancienne mise et inférieure à la wallet du streamer
-        if (bid > this.currentBid && bid < streamer.balance) {
-            // Assigne les nouvelles informations pour le tarif et l'acquéreur
-            this.currentBid = bid;
-            this.currentBidder = streamer;
-
-            const remainingTime = this.computeRemainingTime()
-            let embed: MessageEmbed | undefined;
-
-            // Ajout de l'incrément si le temps restant est inférieur à l'incrément
-            if (remainingTime < player.incrementTime * 1_000) {
-                this.scheduleAuctionEnd(player.incrementTime * 1_000)
-                embed = this.generateEmbedForPlayer(Math.ceil(Date.now() / 1_000) + player.incrementTime)
-            } else {
-                embed = this.generateEmbedForPlayer()
-            }
-
-            this.currentEmbedMessage!.edit({ embeds: [embed] })
+        if (this.isInvalidBid(streamer, bid, player)) {
+            return void message.delete();
         }
+
+        // Assigne les nouvelles informations pour le tarif et l'acquéreur
+        this.currentBid = bid;
+        this.currentBidder = streamer;
+
+        // Gestion du timer
+        const remainingTime = this.computeRemainingTime();
+        let extraSeconds = 0;
+
+        if (remainingTime < player.incrementTime * 1_000) {
+            extraSeconds = player.incrementTime;
+            this.scheduleAuctionEnd(extraSeconds * 1_000);
+        }
+
+        // Mise à jour de l'embed
+        const endTime = extraSeconds
+            ? Math.ceil(Date.now() / 1_000) + extraSeconds
+            : undefined;
+
+        const embed = this.generateEmbedForPlayer(endTime);
+        this.currentEmbedMessage?.edit({ embeds: [embed] });
+
         message.delete();
     }
 }
