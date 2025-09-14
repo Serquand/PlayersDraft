@@ -21,7 +21,7 @@ export default class DraftEmbedGenerator {
                 { name: "Nom", value: this._draft.name, inline: true },
                 { name: "Breakdown", value: this._draft.breakDown ?? "Non défini", inline: true },
                 { name: "Status", value: this._draft.status, inline: true },
-                { name: "Streamers", value: streamerValue, inline: false }
+                { name: "Streamers", value: streamerValue, inline: true }
             );
     }
 
@@ -36,7 +36,7 @@ export default class DraftEmbedGenerator {
             embed.addFields({
                 name: streamer.username || 'NC',
                 value: `Streamer : <@${streamer.discordId}>\n${value}`,
-                inline: false
+                inline: true
             });
         }
 
