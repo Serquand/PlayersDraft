@@ -5,6 +5,7 @@ import { sendHiddenInteractionResponse } from "../../utils/discord";
 
 const command = {
     name: 'view_draft_information',
+    order: 4,
     description: 'View information about a specific draft',
     options: [
         {

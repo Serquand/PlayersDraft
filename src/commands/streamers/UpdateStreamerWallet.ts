@@ -6,6 +6,7 @@ import { DraftStatus } from "../../utils/Interfaces";
 
 const command = {
     name: "update_streamer_wallet",
+    order: 7,
     description: "Update a streamer's wallet balance in a draft",
     options: [
         {

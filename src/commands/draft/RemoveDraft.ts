@@ -4,6 +4,7 @@ import DraftService from "../../services/Draft.service";
 
 const command = {
     name: 'remove_draft',
+    order: 7,
     description: "Supprimer une draft",
     options: [
         {

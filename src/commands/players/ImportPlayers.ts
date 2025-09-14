@@ -9,6 +9,7 @@ import DraftService from "../../services/Draft.service";
 
 const command = {
     name: 'import_players',
+    order: 3,
     description: "Importer des joueurs depuis un fichier Excel",
     options: [
         {

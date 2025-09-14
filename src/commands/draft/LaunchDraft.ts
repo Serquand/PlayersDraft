@@ -6,6 +6,7 @@ import { DraftStatus } from "../../utils/Interfaces";
 
 const command = {
     name: 'launch_draft',
+    order: 2,
     options: [
         {
             name: "draft",

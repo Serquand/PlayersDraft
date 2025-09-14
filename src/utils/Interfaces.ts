@@ -8,3 +8,9 @@ export interface INumberOfPlayers {
     total: number;
     byTownHalls: Array<number>;
 }
+
+export interface BotCommand {
+    name: string;
+    description: string;
+    order: number
+};

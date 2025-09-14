@@ -5,6 +5,7 @@ import { sendHiddenInteractionResponse } from "../../utils/discord";
 
 const command = {
     name: "remove_streamer",
+    order: 6,
     description: "Remove a streamer from a draft",
     options: [
         {

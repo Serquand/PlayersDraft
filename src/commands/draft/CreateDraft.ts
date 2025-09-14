@@ -5,6 +5,7 @@ import { isValidBreakdown, isValidTime } from "../../utils/validators";
 
 const command = {
     name: 'create_draft',
+    order: 1,
     description: "Crée une nouvelle draft",
     options: [
         {

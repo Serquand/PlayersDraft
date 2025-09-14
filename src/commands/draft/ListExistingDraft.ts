@@ -4,6 +4,7 @@ import DraftService from "../../services/Draft.service";
 
 const command = {
     name: 'list_draft',
+    order: 9,
     description: "Enregistrer une nouvelle draft",
     runSlash: async (client: Client, interaction: CommandInteraction) => {
         const drafts = await DraftService.listDraft();

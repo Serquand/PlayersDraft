@@ -5,6 +5,7 @@ import PlayerService from "../../services/Player.service";
 
 const command = {
     name: "add_streamer",
+    order: 5,
     description: "Add a streamer to a draft",
     options: [
         {

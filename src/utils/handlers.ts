@@ -1,16 +1,7 @@
 import { Client } from "discord.js";
-import { promises as fs } from "fs";
-import path from "path";
+import { loadFiles } from "./common";
 
 const basisLocation = process.env.NODE_ENV === "prod" ? 'dist/' : 'src/'
-
-export const loadFiles = async (dir: string): Promise<string[]> => {
-    const directoryPath = path.resolve(process.cwd(), dir);
-    const files = await fs.readdir(directoryPath, { recursive: true });
-    return files
-        .filter((file) => file.endsWith(".ts") || file.endsWith(".js"))
-        .map((file) => path.join(directoryPath, file));
-};
 
 export const commandHandler = async (client: Client) => {
     try {
