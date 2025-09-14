@@ -4,6 +4,7 @@ import { AutocompleteInteraction, Client, CommandInteraction, PermissionResolvab
 import DraftService from "../../services/Draft.service";
 import { sendHiddenInteractionResponse } from "../../utils/discord";
 import games, { Game } from "../../services/Game.service";
+import { DraftStatus } from "../../utils/Interfaces";
 
 const command = {
     name: 'launch_draft',
@@ -31,8 +32,8 @@ const command = {
         if(channel.type !== 'GUILD_TEXT') { // Check if the channel is a text channel
             return sendHiddenInteractionResponse(interaction, "Le channel doit être un channel texte.");
         }
-        if (!draft) { // Check if the draft exists
-            return sendHiddenInteractionResponse(interaction, "Draft introuvable");
+        if (!draft || draft.status !== DraftStatus.NOT_STARTED) { // Check if the draft exists
+            return sendHiddenInteractionResponse(interaction, "Draft introuvable ou déjà commencée / terminée");
         }
         if (draft.streamers.length < 2) {
             return sendHiddenInteractionResponse(interaction, "Une draft doit avoir au moins 2 streamers pour être lancée.");

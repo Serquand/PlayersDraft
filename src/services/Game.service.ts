@@ -3,6 +3,7 @@ import { Draft, Player, Streamer } from "../models";
 import { DraftStatus } from "../utils/Interfaces";
 import { generateRandomNumber, sleep } from "../utils/common";
 import DraftService from "./Draft.service";
+import { AppDataSource } from "../database";
 
 export class Game {
     private _draft: Draft;
@@ -63,17 +64,21 @@ export class Game {
         return true
     }
 
-    private endDraft() {
-        this.log("Draft terminée ✅");
+    private async endDraft() {
+        this._draft.status = DraftStatus.COMPLETED; // Mettre à jour le statut de la draft
+
+        // Sauvegarder la draft, les joueurs, et les streamers
+        await Promise.all([
+            AppDataSource.getRepository(Draft).save(this._draft),
+            AppDataSource.getRepository(Player).save(this._players),
+        ])
 
         delete games[this._channelId]; // Supprimer la draft de la liste
-        this._draft.status = DraftStatus.COMPLETED; // Mettre à jour le statut de la draft
-        // TODO: Sauvegarder la draft et ses joueurs en DB via TypeORM
     }
 
     private async startNextAuction() {
         if (this.currentPlayerIndex >= this._players.length) {
-            this.endDraft();
+            await this.endDraft();
             return;
         }
 
