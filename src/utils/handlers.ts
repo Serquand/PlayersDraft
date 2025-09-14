@@ -27,7 +27,7 @@ export const commandHandler = async (client: Client) => {
                     continue;
                 }
 
-                // @ts-ignore
+                // @ts-expect-error The commands attribute has been set in src/index.ts and now exists
                 client.commands.set(cmd.name, cmd);
                 console.log(`✅ Commande chargée : ${cmd.name} => (${i + 1} / ${commandFiles.length})`);
             } catch (error) {

@@ -69,6 +69,7 @@ const command = {
                 basisIncrementTime
             });
             return sendHiddenInteractionResponse(interaction, `✅ La draft ${name} a été enregistrée avec succès !`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
             if (err.code === 'ER_DUP_ENTRY') {
                 return sendHiddenInteractionResponse(interaction, `❌ Une draft avec le nom ${name} existe déjà. Veuillez choisir un nom différent.`);

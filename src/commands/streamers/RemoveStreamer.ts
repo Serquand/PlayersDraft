@@ -46,9 +46,10 @@ const command = {
         switch(interaction.options.getFocused(true).name) {
             case "draft":
                 return DraftService.autocompleteDraft(interaction);
-            case "streamer":
+            case "streamer": {
                 const draftName = interaction.options.getString("draft");
                 return StreamerService.autocompleteStreamerInDraft(interaction, draftName);
+            }
         }
     }
 }

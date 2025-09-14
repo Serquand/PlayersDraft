@@ -4,6 +4,7 @@ import { DraftStatus } from "../utils/Interfaces";
 import { generateRandomNumber, sleep } from "../utils/common";
 import DraftService from "./Draft.service";
 import { AppDataSource } from "../database";
+import { basisEmbed } from "../utils/constants";
 
 export class Game {
     private _draft: Draft;
@@ -171,9 +172,7 @@ export class Game {
 
         const player = this._players[this.currentPlayerIndex];
 
-        return new MessageEmbed()
-            .setColor('DARK_RED')
-            .setThumbnail("https://www.coupedesregions.com/logo-cdr.png")
+        return basisEmbed
             .setTitle(`Enchère pour le joueur : ${player.name} ${player.townHallLevel ? `(TH ${player.townHallLevel})` : ''}`)
             .setFields(
                 { name: "Status", value: status, inline: true },
@@ -181,6 +180,7 @@ export class Game {
                 { name: "\u200B", value: "\u200B", inline: true },
                 { name: "Montant actuel", value: `${this.currentBid}`, inline: true },
                 { name: "Enchéreur", value: this.currentBidder ? `<@${this.currentBidder.discordId}>` : 'Aucun', inline: true },
+                { name: "<@351488690029199360>", value: 'Aucun', inline: true },
             )
     }
 

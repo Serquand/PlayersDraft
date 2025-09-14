@@ -84,6 +84,7 @@ class DraftService {
         return true;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     checkIfNumberOfPlayersIsValid(draft: Draft, data: Array<any>): boolean {
         const numberOfPlayers = this.getNumberOfPlayerForDraft(draft);
         if (!numberOfPlayers || data.length !== numberOfPlayers.total) return false;

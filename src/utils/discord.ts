@@ -1,18 +1,14 @@
-import { AnyChannel, Client, DMChannel, Message, NewsChannel, TextChannel } from "discord.js";
+import { AnyChannel, Client, CommandInteraction, DMChannel, Message, NewsChannel, TextChannel } from "discord.js";
 
-export const sendHiddenInteractionResponse = (interaction: any, content: string = 'Something went wrong') => {
+export const sendHiddenInteractionResponse = (interaction: CommandInteraction, content: string = 'Something went wrong') => {
     return interaction.reply({ content, ephemeral: true });
-}
-
-export const sendErrorInteractionResponse = (interaction: any) => {
-    return sendHiddenInteractionResponse(interaction, "Something bad happened !");
 }
 
 export const fetchChannel = async (client: Client, channelId: string): Promise<AnyChannel | null> => {
     try {
         const channel = await client.channels.fetch(channelId);
         return channel;
-    } catch (err) {
+    } catch {
         return null;
     }
 }
@@ -31,7 +27,7 @@ export const fetchMessage = async (client: Client, channelId: string, messageId:
     try {
         const message = await channel.messages.fetch(messageId);
         return message;
-    } catch (error) {
+    } catch {
         return null;
     }
 };

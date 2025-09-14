@@ -1,3 +1,4 @@
+// TODO: Supprimer le Discord Username de partout => ne passer que par le DiscordID / Si besoin d'affichage : <@DISCORD_ID>
 import { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
 import DraftService from "../../services/Draft.service";
 
@@ -15,7 +16,8 @@ const command = {
     ],
     async runSlash(client: Client, interaction: CommandInteraction) {
         const draftName = interaction.options.getString('draft_name', true);
-        const draft = await DraftService.getDraftByName(draftName, ['streamers', 'players'])
+        const draft = await DraftService.getDraftByName(draftName, ['streamers', 'players', 'streamers.players'])
+        console.log(draft)
         // TODO:
     },
     autocomplete: (interaction: AutocompleteInteraction) => DraftService.autocompleteDraft(interaction)

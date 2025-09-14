@@ -1,5 +1,5 @@
 import { AutocompleteInteraction, Client, CommandInteraction } from "discord.js";
-import { sendHiddenInteractionResponse, sendErrorInteractionResponse } from "../../utils/discord";
+import { sendHiddenInteractionResponse } from "../../utils/discord";
 import XLSX from "xlsx";
 import fetch from "node-fetch";
 import PlayerService from "../../services/Player.service";
@@ -55,6 +55,7 @@ const command = {
             const sheet = workbook.Sheets[sheetName];
 
             // Convertir la première feuille en JSON
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data: any[] = XLSX.utils.sheet_to_json(sheet);
             if (!DraftService.checkIfNumberOfPlayersIsValid(draft, data)) {
                 return sendHiddenInteractionResponse(interaction, "Le fichier Excel ne contient pas un nombre valide de joueurs !");
@@ -89,7 +90,7 @@ const command = {
             return sendHiddenInteractionResponse(interaction, `✅ ${players.length} joueurs ont été importés avec succès !`);
         } catch (err) {
             console.error(err);
-            return sendErrorInteractionResponse(interaction);
+            return sendHiddenInteractionResponse(interaction);
         }
     },
     autocomplete: (interaction: AutocompleteInteraction) => DraftService.autocompleteDraft(interaction)

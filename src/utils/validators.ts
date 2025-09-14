@@ -1,5 +1,6 @@
 import DraftService from "../services/Draft.service";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isRowPlayerValid = (row: any): boolean => {
     // name => String non vide
     if (typeof row.Name !== "string" || row.Name.trim() === "") return false;

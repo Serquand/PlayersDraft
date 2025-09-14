@@ -15,7 +15,7 @@ export default {
             console.log("Guild not found. Set a GUILD_ID environment variable that matches a guild the BOT is in.");
             return;
         }
-        // @ts-ignore
+        // @ts-expect-error The commands property has been set in src/index.ts and now exists
         guild.commands.set(client.commands.map((cmd) => cmd));
         console.log("Bot launched !");
     }

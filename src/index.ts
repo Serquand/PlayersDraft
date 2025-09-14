@@ -3,13 +3,13 @@ import * as dotenv from "dotenv";
 dotenv.config({ quiet: false });
 
 import { initializeDatabase } from "./database";
-import { Client, Collection, TextChannel } from "discord.js";
+import { Client, Collection } from "discord.js";
 import { commandHandler, eventHandler } from "./utils/handlers";
 
 async function main() {
     const client = new Client({ intents: 3276799 });
 
-    // @ts-ignore
+    // @ts-expect-error Commands will be added to the client with the following line
     client.commands = new Collection();
     client.login(process.env.BOT_TOKEN);
 
