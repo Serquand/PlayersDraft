@@ -42,7 +42,7 @@ class DraftService {
         const userByTownHalls = []
 
         let counter = 0;
-        for(const th of byTownHalls) {
+        for (const th of byTownHalls) {
             counter += Number.parseInt(th)
             userByTownHalls.push(Number.parseInt(th) * draft.streamers.length);
         }
@@ -53,39 +53,57 @@ class DraftService {
         }
     }
 
+    buildTownHallHistogram(data: Array<{ TownHallLevel: number }>): { counts: Record<number, number>; maxTH: number } | null {
+        const counts: Record<number, number> = {};
+        let maxTH = 0;
+
+        for (const p of data) {
+            const th = p?.TownHallLevel;
+            if (typeof th !== "number" || !Number.isInteger(th) || th <= 0) {
+                return null;
+            }
+            counts[th] = (counts[th] ?? 0) + 1;
+            if (th > maxTH) maxTH = th;
+        }
+
+        return { counts, maxTH };
+    }
+
+    validateTownHallBreakdown(
+        expectedByTownHalls: number[],
+        histogram: { counts: Record<number, number>; maxTH: number }
+    ): boolean {
+        const { counts, maxTH } = histogram;
+
+        for (let i = 0; i < expectedByTownHalls.length; i++) {
+            const th = maxTH - i; // même logique que ton code d'origine
+            const actual = counts[th] ?? 0;
+            if (actual !== expectedByTownHalls[i]) return false;
+        }
+
+        return true;
+    }
+
     checkIfNumberOfPlayersIsValid(draft: Draft, data: Array<any>): boolean {
         const numberOfPlayers = this.getNumberOfPlayerForDraft(draft);
         if (!numberOfPlayers) return false;
 
+        const actualTotal = data.length;
+
+        // Pas de breakdown => juste vérifier une répartition possible entre streamers
         if (!draft.breakDown) {
-            return data.length % draft.streamers.length === 0;
+            return actualTotal > 0 && actualTotal % draft.streamers.length === 0;
         }
 
-        const actualNumberOfPlayers = data.length;
-        if(actualNumberOfPlayers !== numberOfPlayers.total) {
+        // Avec breakdown => total exact + matching de l'histogramme
+        if (actualTotal !== numberOfPlayers.total) {
             return false;
         }
 
-        const townHallCount: Record<number, number> = {};
-        let maxTH = 1;
-        for (const player of data) {
-            const th = player.TownHallLevel;
-            if (typeof th !== 'number' || !Number.isInteger(th) || th <= 0) {
-                return false;
-            }
-            if (th > maxTH) maxTH = th;
-            townHallCount[th] = (townHallCount[th] || 0) + 1;
-        }
+        const histogram = this.buildTownHallHistogram(data as Array<{ TownHallLevel: number }>);
+        if (!histogram) return false;
 
-        for (let i = 0; i < numberOfPlayers.byTownHalls.length; i++) {
-            const expectedCount = numberOfPlayers.byTownHalls[i];
-            const actualCount = townHallCount[maxTH - i] || 0;
-            if (expectedCount !== actualCount) {
-                return false;
-            }
-        }
-
-        return true;
+        return this.validateTownHallBreakdown(numberOfPlayers.byTownHalls, histogram);
     }
 
     async deleteDraftByName(name: string): Promise<void> {

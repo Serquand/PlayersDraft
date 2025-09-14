@@ -34,7 +34,7 @@ const command = {
         {
             name: "break_down",
             type: "STRING",
-            required: false,
+            required: true,
             description: "Le break down de la draft au format X/X/X/X... (remplaçant inclus)"
         }
     ],
@@ -43,7 +43,7 @@ const command = {
         const basisMoneyPerStreamer = interaction.options.getInteger("basis_money_per_streamer", true);
         const basisIncrementTime = interaction.options.getInteger("basis_increment_time", true);
         const basisExpirationTime = interaction.options.getInteger("basis_expiration_time", true);
-        const breakDown = interaction.options.getString("break_down");
+        const breakDown = interaction.options.getString("break_down", true);
 
         if (!isValidTime(basisExpirationTime)) {
             return sendHiddenInteractionResponse(interaction, "Le temps d'expiration n'est pas valide !")
@@ -51,7 +51,7 @@ const command = {
             return sendHiddenInteractionResponse(interaction, "Le temps d'incrément n'est pas valide !")
         }
 
-        if (breakDown && !isValidBreakdown(breakDown)) {
+        if (!isValidBreakdown(breakDown)) {
             return sendHiddenInteractionResponse(interaction, "Le break down doit être au format X/X/X/X... (ex: 3/3/3/3/3) et être un multiple de 5 !");
         }
 
